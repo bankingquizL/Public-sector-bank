@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bank Exam Quiz</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+}
+
+/* ========================= */
+/* TIMER AREA */
+/* ========================= */
+
+#timer-container{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:#f4f6f9;
+    padding-bottom:10px;
+}
+
+#timer{
+    background:#222;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.timer-buttons{
+    text-align:center;
+}
+
+#pauseBtn,
+#resumeBtn{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    margin:5px;
+}
+
+#pauseBtn{
+    background:#ff9800;
+    color:white;
+}
+
+#resumeBtn{
+    background:#28a745;
+    color:white;
+}
+
+.question{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.question h3{
+    margin-bottom:15px;
+}
+
+.option{
+    display:block;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.option:hover{
+    background:#f0f0f0;
+}
+
+.selected{
+    background:#cfe2ff;
+    border:2px solid #0d6efd;
+}
+
+.mark-btn{
+    margin-top:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#ff9800;
+    color:white;
+}
+
+.marked{
+    background:#ffcc80 !important;
+}
+
+.review-marked{
+    background:#e0e0e0 !important;
+    border:2px solid #9e9e9e;
+}
+
+.clear-btn{
+    margin-top:10px;
+    margin-left:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#dc3545;
+    color:white;
+}
+
+.submit-btn{
+    width:100%;
+    padding:15px;
+    font-size:20px;
+    border:none;
+    border-radius:10px;
+    background:#28a745;
+    color:white;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+.result-box{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.review-btn{
+    padding:12px 20px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:#007bff;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.review-question{
+    background:white;
+    padding:20px;
+    margin:20px 0;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.correct{
+    color:green;
+    font-weight:bold;
+}
+
+.wrong{
+    color:red;
+    font-weight:bold;
+}
+
+.unanswered{
+    color:orange;
+    font-weight:bold;
+}
+
+.correct-answer{
+    background:#d4edda;
+    padding:10px;
+    border-radius:8px;
+    margin-top:10px;
+}
+
+.disabled-option{
+    pointer-events:none;
+    opacity:0.6;
+}
+
+.disabled-btn{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Bank Exam MCQ Quiz</h1>
+
+<!-- ========================= -->
+<!-- TIMER -->
+<!-- ========================= -->
+
+<div id="timer-container">
+
+    <div id="timer">
+        Time Left: 20:00
+    </div>
+
+    <div class="timer-buttons">
+
+        <button id="pauseBtn" onclick="pauseTimer()">
+            Pause
+        </button>
+
+        <button id="resumeBtn" onclick="resumeTimer()" disabled>
+            Resume
+        </button>
+
+    </div>
+
+</div>
+
+<div id="quiz"></div>
+
+<button class="submit-btn" onclick="submitQuiz()">
+Submit Quiz
+</button>
+
+</div>
+
+<script>
+
+// ===============================
+// QUESTIONS AREA
+// ===============================
+
+const questions = [
+{q:"Punjab National Bank (PNB), one of India's major public sector banks, was established in which year according to the given banking reference table?",options:["1906","1894","1908","1911"],answer:1},
+{q:"Which of the following taglines is associated with Punjab National Bank (PNB), headquartered in New Delhi?",options:["Your Own Bank","Honours Your Trust","The Name You Can Bank upon","Good People to Bank With"],answer:2},
+{q:"Bank of India (BOI), headquartered in Mumbai, Maharashtra, commenced its banking operations in which year?",options:["1906","1907","1908","1911"],answer:0},
+{q:"Identify the correct headquarters–establishment year combination for Canara Bank, whose tagline is 'Together We Can'.",options:["Chennai, Tamil Nadu – 1907","Pune, Maharashtra – 1935","Mumbai, Maharashtra – 1906","Bengaluru, Karnataka – 1906"],answer:3},
+{q:"Which bank among the following was established in 1907 and has its headquarters in Chennai, Tamil Nadu?",options:["Indian Overseas Bank","Indian Bank","Punjab National Bank","Central Bank of India"],answer:1},
+{q:"'India's International Bank' is the tagline of which public sector bank established in 1908?",options:["Punjab and Sind Bank","Central Bank of India","Bank of Baroda","Bank of Maharashtra"],answer:2},
+{q:"Punjab and Sind Bank (PSB), whose tagline is 'Where Service is a Way of life', was established in which year?",options:["1908","1911","1919","1935"],answer:0},
+{q:"Central Bank of India (CBI), headquartered in Mumbai, Maharashtra, was established in which year?",options:["1908","1919","1937","1911"],answer:3},
+{q:"Which of the following banks has the tagline 'Good people to bank with' and was established in 1919?",options:["Bank of India","Union Bank of India","Indian Bank","UCO Bank"],answer:1},
+{q:"Bank of Maharashtra, headquartered in Pune, Maharashtra, was established in which year?",options:["1937","1943","1935","1955"],answer:2},
+{q:"Identify the bank associated with the tagline 'Good People to Grow With' and headquartered in Chennai, Tamil Nadu.",options:["Indian Overseas Bank (IOB)","Indian Bank","Canara Bank","Punjab National Bank"],answer:0},
+{q:"UCO Bank, headquartered in Kolkata, West Bengal, was established in which year?",options:["1935","1937","1955","1943"],answer:3},
+{q:"Which public sector bank has the tagline 'The Banker to Every Indian' and was established in 1955?",options:["Union Bank of India","State Bank of India (SBI)","Bank of Baroda","Central Bank of India"],answer:1},
+{q:"Which of the following bank–tagline pairs is correctly matched according to the given table?",options:["Bank of India – Together We Can","Canara Bank – Your Own Bank","Indian Bank – Your Own Bank","Bank of Baroda – Honours Your Trust"],answer:2},
+{q:"Consider the following banks and their establishment years: 1. Punjab National Bank – 1894 2. Bank of India – 1906 3. Indian Bank – 1907 4. Bank of Baroda – 1908. Which of the above pairs are correctly matched?",options:["1, 2, 3 and 4","Only 1 and 2","Only 2 and 3","Only 1, 3 and 4"],answer:0},
+{q:"Which pair of banks was established in the same year, 1908, according to the given table?",options:["Bank of India and Canara Bank","Indian Bank and Central Bank of India","Union Bank of India and Bank of Maharashtra","Bank of Baroda and Punjab and Sind Bank"],answer:3},
+{q:"Which of the following banks was established earliest among the listed public sector banks?",options:["Bank of India","Punjab National Bank","Canara Bank","Indian Bank"],answer:1},
+{q:"Which bank among the following was established in 1911 and has the tagline 'Central to You Since 1911'?",options:["Union Bank of India","Punjab and Sind Bank","Central Bank of India","UCO Bank"],answer:2},
+{q:"Which of the following banks is headquartered in Vadodara, Gujarat, and was established in 1908?",options:["Bank of Baroda","Bank of Maharashtra","Bank of India","Punjab and Sind Bank"],answer:0},
+{q:"Identify the correctly matched bank, headquarters and tagline combination.",options:["Indian Bank – Mumbai – The Name You Can Bank upon","Canara Bank – Bengaluru – Together We Can","Indian Overseas Bank – Kolkata – Good People to Grow With","UCO Bank – Chennai – Honours Your Trust"],answer:1},
+{q:"Which of the following banks has its headquarters in Pune, Maharashtra, and the tagline 'One Family, One Bank'?",options:["Bank of India","Union Bank of India","Bank of Maharashtra","Central Bank of India"],answer:2},
+{q:"Among the following banks, which one was established in 1937 and is headquartered in Chennai, Tamil Nadu?",options:["Indian Overseas Bank","Indian Bank","UCO Bank","State Bank of India"],answer:0},
+{q:"Which bank was established in 1943 and has its headquarters in Kolkata, West Bengal?",options:["Bank of Maharashtra","Central Bank of India","Punjab and Sind Bank","UCO Bank"],answer:3},
+{q:"Which of the following establishment-year sequences is arranged in ascending chronological order?",options:["Bank of India ; Indian Bank  ; Central Bank of India; Union Bank of India ","Indian Bank; Bank of India; Union Bank of India ; Central Bank of India ","Central Bank of India ; Bank of Baroda ; Indian Bank ; SBI ","Punjab National Bank ; Canara Bank; UCO Bank ; SBI"],answer:0},
+{q:"Which bank has the tagline 'Where Service is a Way of life' and shares its establishment year with Bank of Baroda?",options:["Punjab National Bank","Punjab and Sind Bank","Bank of India","Union Bank of India"],answer:1},
+{q:"Which of the following bank–headquarters pairs is incorrectly matched according to the given table?",options:["State Bank of India – Mumbai","Indian Bank – Chennai","UCO Bank – Kolkata","Canara Bank – Pune"],answer:3},
+{q:"Which bank among the following is associated with the tagline 'Relationship Beyond Banking'?",options:["Bank of India","Bank of Baroda","Indian Overseas Bank","Punjab National Bank"],answer:0},
+{q:"Which pair of banks has its headquarters in Chennai, Tamil Nadu, according to the given table?",options:["Canara Bank and Indian Bank","Indian Bank and Indian Overseas Bank","Indian Overseas Bank and UCO Bank","Punjab National Bank and Indian Bank"],answer:1},
+{q:"Which of the following banks was established in 1955, making it the latest-established bank in the given list?",options:["UCO Bank","Bank of Maharashtra","State Bank of India","Indian Overseas Bank"],answer:2},
+{q:"Which bank's tagline is 'Honours Your Trust', and what is its headquarters?",options:["Punjab and Sind Bank – New Delhi","Central Bank of India – Mumbai","Bank of Baroda – Vadodara","UCO Bank – Kolkata"],answer:3},
+{q:"Consider the following bank–tagline pairs: 1. SBI – The Banker to Every Indian 2. Bank of Maharashtra – One Family, One Bank 3. Indian Overseas Bank – Good People to bank With 4. Union Bank of India – Good people to bank with. Which of the above are correctly matched?",options:["1, 2 and 4","Only 1 and 2","Only 2 and 3","Only 1, 3 and 4"],answer:0},
+{q:"Which of the following banks was established in 1906 and has its headquarters in Mumbai, Maharashtra, with the tagline 'Relationship Beyond Banking'?",options:["Canara Bank","Bank of India","Indian Bank","Bank of Baroda"],answer:1},
+{q:"Which bank among the following was established in 1908 and has its headquarters in New Delhi?",options:["Bank of Baroda","Central Bank of India","Punjab and Sind Bank","Bank of Maharashtra"],answer:2},
+{q:"Which of the following banks was established in 1935 and is headquartered in Pune, Maharashtra?",options:["Bank of Maharashtra","Indian Overseas Bank","UCO Bank","State Bank of India"],answer:0},
+{q:"Identify the correct bank–establishment year–headquarters combination from the following options.",options:["Union Bank of India – 1911 – Mumbai","Central Bank of India – 1919 – Mumbai","Indian Bank – 1906 – Chennai","Union Bank of India – 1919 – Mumbai"],answer:3},
+{q:"Which of the following banks has its headquarters in New Delhi and was established in 1894?",options:["Punjab and Sind Bank","Punjab National Bank","Bank of India","Central Bank of India"],answer:1},
+{q:"Which bank is associated with the tagline 'Central to You Since 1911', while its establishment year is also reflected in the tagline?",options:["Bank of Baroda","Union Bank of India","Central Bank of India","State Bank of India"],answer:2},
+{q:"Consider the following banks and their headquarters: 1. Bank of India – Mumbai 2. Canara Bank – Bengaluru 3. UCO Bank – Kolkata 4. Bank of Maharashtra – Mumbai. Which of the above are correctly matched?",options:["1, 2  and 3","Only 1 and 2","Only 2 and 4","Only 1, 3 and 4"],answer:0},
+{q:"Which of the following combinations correctly identifies the bank established in 1907, its headquarters and its tagline?",options:["Indian Overseas Bank – Chennai – Good People to Grow With","Indian Bank – Chennai – Your Own Bank","Bank of India – Mumbai – Relationship Beyond Banking","Canara Bank – Bengaluru – Together We Can"],answer:1},
+
+];
+
+
+
+// ===============================
+// VARIABLES
+// ===============================
+
+let userAnswers = new Array(questions.length).fill(null);
+
+let markedForReview = new Array(questions.length).fill(false);
+
+let submitted = false;
+
+// ===============================
+// LOAD QUIZ
+// ===============================
+
+function loadQuiz(){
+
+    const quizDiv = document.getElementById("quiz");
+
+    questions.forEach((question,index)=>{
+
+        const qDiv = document.createElement("div");
+
+        qDiv.classList.add("question");
+
+        qDiv.id = `question_${index}`;
+
+        qDiv.innerHTML = `
+        <h3>Q${index+1}. ${question.q}</h3>
+        `;
+
+        question.options.forEach((option,optIndex)=>{
+
+            const opt = document.createElement("div");
+
+            opt.classList.add("option");
+
+            opt.innerText = option;
+
+            opt.onclick = ()=>selectOption(index,optIndex,opt);
+
+            opt.id = `q${index}_opt${optIndex}`;
+
+            qDiv.appendChild(opt);
+
+        });
+
+        // MARK BUTTON
+
+        const markBtn = document.createElement("button");
+
+        markBtn.innerText = "Mark For Review";
+
+        markBtn.classList.add("mark-btn");
+
+        markBtn.onclick = ()=>toggleMark(index,markBtn);
+
+        qDiv.appendChild(markBtn);
+
+        // CLEAR BUTTON
+
+        const clearBtn = document.createElement("button");
+
+        clearBtn.innerText = "Clear";
+
+        clearBtn.classList.add("clear-btn");
+
+        clearBtn.onclick = ()=>clearAnswer(index);
+
+        qDiv.appendChild(clearBtn);
+
+        quizDiv.appendChild(qDiv);
+
+    });
+
+}
+
+// ===============================
+// SELECT OPTION
+// ===============================
+
+function selectOption(qIndex,optIndex,element){
+
+    if(submitted) return;
+
+    userAnswers[qIndex] = optIndex;
+
+    const options = document.querySelectorAll(`[id^="q${qIndex}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+    element.classList.add("selected");
+
+}
+
+// ===============================
+// MARK FOR REVIEW
+// ===============================
+
+function toggleMark(index,button){
+
+    markedForReview[index] = !markedForReview[index];
+
+    const questionBox = document.getElementById(`question_${index}`);
+
+    if(markedForReview[index]){
+
+        button.classList.add("marked");
+
+        button.innerText = "Marked For Review";
+
+        questionBox.classList.add("review-marked");
+
+    }else{
+
+        button.classList.remove("marked");
+
+        button.innerText = "Mark For Review";
+
+        questionBox.classList.remove("review-marked");
+
+    }
+
+}
+
+// ===============================
+// CLEAR ANSWER
+// ===============================
+
+function clearAnswer(index){
+
+    if(submitted) return;
+
+    userAnswers[index] = null;
+
+    const options = document.querySelectorAll(`[id^="q${index}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+}
+
+// ===============================
+// SUBMIT QUIZ
+// ===============================
+
+function submitQuiz(){
+
+    if(submitted) return;
+
+    submitted = true;
+
+    clearInterval(timer);
+
+    let score = 0;
+
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        if(userAns === null){
+
+            unansweredCount++;
+
+        }
+        else if(userAns === question.answer){
+
+            score += 1;
+            correctCount++;
+
+        }
+        else{
+
+            score -= 0.25;
+            wrongCount++;
+
+        }
+
+    });
+
+    let attempted = correctCount + wrongCount;
+
+    let accuracy = attempted > 0
+    ? ((correctCount/attempted)*100).toFixed(2)
+    : 0;
+
+    document.body.innerHTML = `
+
+    <div class="container">
+
+        <div class="result-box">
+
+            <h1>Quiz Submitted ✅</h1>
+
+            <h2>Total Score: ${score.toFixed(2)}</h2>
+
+            <h3>Correct Answers: ${correctCount}</h3>
+
+            <h3>Wrong Answers: ${wrongCount}</h3>
+
+            <h3>Unanswered Questions: ${unansweredCount}</h3>
+
+            <h3>Accuracy: ${accuracy}%</h3>
+
+            <button class="review-btn" onclick="reviewAnswers()">
+            Review Answers
+            </button>
+
+            <div id="reviewSection"></div>
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+// ===============================
+// REVIEW ANSWERS
+// ===============================
+
+function reviewAnswers(){
+
+    const reviewSection = document.getElementById("reviewSection");
+
+    let html = `<h1 style="margin-top:40px;">Review Section</h1>`;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        let status = "";
+        let marks = "";
+
+        if(userAns === null){
+
+            status = `<span class="unanswered">Unanswered</span>`;
+            marks = `0 Marks`;
+
+        }
+        else if(userAns === question.answer){
+
+            status = `<span class="correct">Correct ✅</span>`;
+            marks = `+1 Mark`;
+
+        }
+        else{
+
+            status = `<span class="wrong">Wrong ❌</span>`;
+            marks = `-0.25 Mark`;
+
+        }
+
+        html += `
+
+        <div class="review-question">
+
+            <h3>Q${index+1}. ${question.q}</h3>
+
+            <p>${status}</p>
+
+            <p><b>Marks:</b> ${marks}</p>
+
+            <p>
+            <b>Your Answer:</b>
+            ${
+                userAns === null
+                ? "Not Attempted"
+                : question.options[userAns]
+            }
+            </p>
+
+            <div class="correct-answer">
+            <b>Correct Answer:</b>
+            ${question.options[question.answer]}
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    reviewSection.innerHTML = html;
+
+}
+
+// ===============================
+// TIMER
+// ===============================
+
+let time = 1800;
+
+let timer;
+
+let isPaused = false;
+
+function startTimer(){
+
+    timer = setInterval(()=>{
+
+        if(!isPaused){
+
+            let minutes = Math.floor(time/60);
+
+            let seconds = time%60;
+
+            document.getElementById("timer").innerText =
+            `Time Left: ${minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
+
+            time--;
+
+            if(time < 0){
+
+                clearInterval(timer);
+
+                alert("Time is up! Quiz auto-submitted.");
+
+                submitQuiz();
+
+            }
+
+        }
+
+    },1000);
+
+}
+
+// ===============================
+// PAUSE TIMER
+// ===============================
+
+function pauseTimer(){
+
+    if(submitted) return;
+
+    isPaused = true;
+
+    document.getElementById("pauseBtn").disabled = true;
+
+    document.getElementById("resumeBtn").disabled = false;
+
+    // Disable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.add("disabled-option");
+    });
+
+    // Disable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = true;
+        btn.classList.add("disabled-btn");
+    });
+
+}
+// ===============================
+// RESUME TIMER
+// ===============================
+
+function resumeTimer(){
+
+    if(submitted) return;
+
+    isPaused = false;
+
+    document.getElementById("pauseBtn").disabled = false;
+
+    document.getElementById("resumeBtn").disabled = true;
+
+    // Enable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.remove("disabled-option");
+    });
+
+    // Enable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = false;
+        btn.classList.remove("disabled-btn");
+    });
+
+}
+// ===============================
+
+loadQuiz();
+
+startTimer();
+
+</script>
+
+</body>
+</html>
